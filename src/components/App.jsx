@@ -4,6 +4,7 @@ import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Button } from './Button/Button';
 import { Loader } from './Loader/Loader';
 import { Modal } from './Modal/Modal';
+import { api } from './Services/Api';
 export class App extends React.Component {
   state = {
     searchImg: ``,
@@ -13,6 +14,15 @@ export class App extends React.Component {
     showModal: false,
     largeImageURL: ``,
   };
+
+  componentDidUpdate(prevProps, prevState) {
+    const { searchImg, page } = this.state;
+    if (prevState.searchImg !== searchImg || prevState.page !== page) {
+      // this.changeStatus(`pending`);
+      api(searchImg, page, this.loadData, this.changeStatus);
+      // this.changeStatus(`resolved`);
+    }
+  }
 
   onSubmit = searchImg => {
     this.setState({ searchImg });
@@ -41,20 +51,11 @@ export class App extends React.Component {
   };
 
   render() {
-    const { searchImg, page, data, status, showModal, largeImageURL } =
-      this.state;
+    const { data, status, showModal, largeImageURL } = this.state;
     return (
       <>
         <Searchbar onSubmit={this.onSubmit} />
-        <ImageGallery
-          searchName={searchImg}
-          page={page}
-          data={data}
-          loadData={this.loadData}
-          showModal={this.showModalOnClick}
-          isModalOpen={this.showModal}
-          changeStatus={this.changeStatus}
-        />
+        <ImageGallery data={data} showModal={this.showModalOnClick} />
         {status === `pending` && <Loader />}
         {data.length > 1 && <Button onClick={this.loadMore} />}
         {showModal && (
